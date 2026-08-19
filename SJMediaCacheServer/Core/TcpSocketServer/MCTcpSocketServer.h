@@ -13,6 +13,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface MCTcpSocketServer : NSObject
 @property (nonatomic, copy, nullable) void(^onListen)(uint16_t port);
 @property (nonatomic, copy, nullable) void(^onConnect)(MCTcpSocketConnection *connection);
+@property (nonatomic) BOOL enableAirPlaySupport;
 @property (nonatomic, readonly) uint16_t port;
 @property (nonatomic, readonly, getter=isRunning) BOOL running;
 - (BOOL)start;

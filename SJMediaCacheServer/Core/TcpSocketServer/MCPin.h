@@ -11,6 +11,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @interface MCPin : NSObject
+@property (nonatomic) BOOL enableAirPlaySupport;
 + (BOOL)isPinReq:(MCHttpRequest *)req;
 
 // @param failureHandler 失败回调; 失败后会自动停止pin, 如需继续 pin 需要重新调用 start;

@@ -8,6 +8,8 @@
 
 @import XCTest;
 
+#import "../../SJMediaCacheServer/Core/Common/MCSNetworkUtils.h"
+
 @interface Tests : XCTestCase
 
 @end
@@ -26,10 +28,8 @@
     [super tearDown];
 }
 
-- (void)testExample
-{
-    XCTFail(@"No implementation for \"%s\"", __PRETTY_FUNCTION__);
+- (void)testDisabledAirPlayAlwaysUsesLoopbackHost {
+    XCTAssertEqualObjects([MCSNetworkUtils localServerHostWithAirPlaySupport:NO], @"127.0.0.1");
 }
 
 @end
-

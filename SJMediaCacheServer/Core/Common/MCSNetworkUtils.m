@@ -13,6 +13,13 @@
 
 @implementation MCSNetworkUtils
 
++ (NSString *)localServerHostWithAirPlaySupport:(BOOL)enableAirPlaySupport {
+    if ( !enableAirPlaySupport ) {
+        return @"127.0.0.1";
+    }
+    return [self getLocalIPAddress] ?: @"127.0.0.1";
+}
+
 + (nullable NSString *)getLocalIPAddress {
     // First try to get WiFi IP address
     NSString *wifiIP = [self getWiFiIPAddress];

@@ -12,6 +12,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface MCSNetworkUtils : NSObject
 
++ (NSString *)localServerHostWithAirPlaySupport:(BOOL)enableAirPlaySupport;
+
 /// Get the device's local IP address for AirPlay support
 /// This method returns the first available local IP address (preferably WiFi)
 /// @return The device's local IP address, or nil if not available

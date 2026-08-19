@@ -137,6 +137,7 @@ static NSString *MCErrorLogsFilePath;
     mRunning = ATOMIC_VAR_INIT(NO);
     mServerQueue = dispatch_queue_create("lib.sj.MCTcpSocketServer", DISPATCH_QUEUE_SERIAL);
     mConnectionQueue = dispatch_queue_create("lib.sj.MCTcpSocketConnection", DISPATCH_QUEUE_SERIAL);
+    _enableAirPlaySupport = YES;
     __weak typeof(self) _self = self;
     mPin = [MCPin.alloc initWithInterval:2 failureHandler:^{
         __strong typeof(_self) self = _self;
@@ -212,6 +213,23 @@ static NSString *MCErrorLogsFilePath;
     }
 }
 
+- (void)setEnableAirPlaySupport:(BOOL)enableAirPlaySupport {
+    @synchronized (self) {
+        if ( _enableAirPlaySupport == enableAirPlaySupport ) {
+            return;
+        }
+
+        _enableAirPlaySupport = enableAirPlaySupport;
+        mPin.enableAirPlaySupport = enableAirPlaySupport;
+        if ( self.isRunning && mListener != nil ) {
+            [mPin stop];
+            nw_listener_cancel(mListener);
+            mListener = nil;
+            [self _setNeedsRestartServer];
+        }
+    }
+}
+
 - (void)_startServer {
     [self _startServerWithPort:0];
 }
@@ -228,13 +246,7 @@ static NSString *MCErrorLogsFilePath;
 
     nw_parameters_t parameters = nw_parameters_create_secure_tcp(NW_PARAMETERS_DISABLE_PROTOCOL, NW_PARAMETERS_DEFAULT_CONFIGURATION);
 
-    // Get device IP address for AirPlay support
-    NSString *deviceIP = @"127.0.0.1"; // Default to localhost
-    // For AirPlay support, we need to use the device's actual IP address
-    NSString *localIP = [MCSNetworkUtils getLocalIPAddress];
-    if (localIP) {
-        deviceIP = localIP;
-    }
+    NSString *deviceIP = [MCSNetworkUtils localServerHostWithAirPlaySupport:self.enableAirPlaySupport];
 
     nw_endpoint_t endpoint = nw_endpoint_create_host(deviceIP.UTF8String, port_str);
     nw_parameters_set_local_endpoint(parameters, endpoint);
@@ -289,8 +301,9 @@ static NSString *MCErrorLogsFilePath;
             uint16_t p = nw_listener_get_port(listener);
             if ( p != self.port ) {
                 atomic_store(&self->mPort, p);
-                if ( self->_onListen ) self->_onListen(p);
             }
+            self->mPin.enableAirPlaySupport = self.enableAirPlaySupport;
+            if ( self->_onListen ) self->_onListen(p);
             [self->mPin startWithPort:p];
         }
 
